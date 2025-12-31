@@ -1,0 +1,34 @@
+Enter number of students: 2
+Enter number of subjects: 3
+Enter student name: Alice
+Enter marks for Alice
+Subject 1: 80
+Subject 2: 90
+Subject 3: 70
+Enter student name: Bob
+Enter marks for Bob
+Subject 1: 50
+Subject 2: 30
+Subject 3: 60
+
+Student Results
+------------------------------------
+Name      : Alice
+Marks     : [80, 90, 70]
+Average   : 80.0
+Highest   : 90
+Lowest    : 70
+Passed    : Yes
+------------------------------------
+Name      : Bob
+Marks     : [50, 30, 60]
+Average   : 46.666668
+Highest   : 60
+Lowest    : 30
+Passed    : No
+------------------------------------
+
+Topper: Alice with average 80.0
+
+Failed Students:
+Bob
