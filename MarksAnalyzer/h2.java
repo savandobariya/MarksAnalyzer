@@ -1,19 +1,15 @@
 import java.util.*;
+
 class Student {
     private String name;
-    private int[] marks;          
-    private float average;        
-    private int highest, lowest;  
-    private boolean isPassed;     
+    private int[] marks;
+    private float average;
+    private int highest, lowest;
+    private boolean passed;
 
-    
-      Constructor to initialize a student with their name and number of subjects.
-      @param name student name
-      @param subjects number of subjects
-     
     public Student(String name, int subjects) {
         this.name = name;
-        this.marks = new int[subjects];
+        marks = new int[subjects];
     }
 
     public String getName() { return name; }
@@ -21,233 +17,139 @@ class Student {
     public float getAverage() { return average; }
     public int getHighest() { return highest; }
     public int getLowest() { return lowest; }
-    public boolean isPassed() { return isPassed; }
+    public boolean isPassed() { return passed; }
 
-    public void enterMarks(Scanner sc) {
-        System.out.println("\n--- Enter marks for " + name + " ---");
-        for (int i = 0; i < marks.length; i++) {
-            while (true) {
-                try {
-                    System.out.print("Subject " + (i+1) + " Marks (0-100): ");
-                    int mark = sc.nextInt();
-
-                    if (mark < 0 || mark > 100) {
-                        throw new IllegalArgumentException("Marks must be between 0 and 100.");
-                    }
-                    marks[i] = mark;
-                    break;
-                } catch (InputMismatchException ime) {
-                    System.out.println("⚠ Invalid input! Please enter an integer.");
-                    sc.nextLine(); // Clear buffer
-                } catch (IllegalArgumentException iae) {
-                    System.out.println("⚠ " + iae.getMessage());
-                }
-            }
+    public void inputMarks(Scanner sc) {
+        System.out.println("\nEnter marks for " + name);
+        for(int i=0; i<marks.length; i++) {
+            int mark;
+            do {
+                System.out.print("Subject " + (i+1) + ": ");
+                mark = sc.nextInt();
+            } while(mark<0 || mark>100);
+            marks[i] = mark;
         }
-        sc.nextLine(); 
-        calculateStatistics();
+        sc.nextLine();
+        calcStats();
     }
 
-    
-    private void calculateStatistics() {
-        int sum = 0;
-        highest = marks[0];
-        lowest = marks[0];
-        isPassed = true;
-
-        for (int mark : marks) {
-            sum += mark;
-            if (mark > highest) highest = mark;
-            if (mark < lowest) lowest = mark;
-            if (mark < 35) isPassed = false;
+    private void calcStats() {
+        int sum=0;
+        highest = lowest = marks[0];
+        passed = true;
+        
+        for(int m : marks) {
+            sum += m;
+            if(m > highest) highest = m;
+            if(m < lowest) lowest = m;
+            if(m < 35) passed = false;
         }
-
-        average = (float) sum / marks.length;
+        average = (float)sum / marks.length;
     }
 }
 
 class MarksAnalyzer {
-    private Student[] students;          
-    private int numSubjects;           
+    private Student[] students;
+    private int numSubs;
 
-    public MarksAnalyzer(int numStudents, int numSubjects) {
-        this.students = new Student[numStudents];
-        this.numSubjects = numSubjects;
+    public MarksAnalyzer(int nStudents, int nSubs) {
+        students = new Student[nStudents];
+        numSubs = nSubs;
     }
 
-   
-      @param sc Scanner object for input.
-    
-    public void inputStudentData(Scanner sc) {
-        System.out.println("\n=== Input Student Data ===");
-        for (int i = 0; i < students.length; i++) {
-            System.out.print("Enter name of Student " + (i + 1) + ": ");
-            String name = sc.nextLine().trim();
-            students[i] = new Student(name, numSubjects);
-            students[i].enterMarks(sc);
+    public void getAllData(Scanner sc) {
+        for(int i=0; i<students.length; i++) {
+            System.out.print("Student " + (i+1) + " name: ");
+            students[i] = new Student(sc.nextLine(), numSubs);
+            students[i].inputMarks(sc);
         }
     }
 
-   
-     
-    public void displayResults() {
-        System.out.println("\n\n===== Student Results =====");
-        System.out.printf("%-15s %-25s %-10s %-10s %-10s %-10s\n",
-            "Name", "Marks (Subjects)", "Average", "Highest", "Lowest", "Status");
-        System.out.println("--------------------------------------------------------------------------------");
+    public void showResults() {
+        System.out.println("\nStudent Results:");
+        System.out.println("Name\t\tMarks\t\tAvg\tHigh\tLow\tStatus");
+        System.out.println("-------------------------------------------------------");
 
-        for (Student s : students) {
-            System.out.printf("%-15s %-25s %-10.2f %-10d %-10d %-10s\n",
-                s.getName(),
-                Arrays.toString(s.getMarks()),
-                s.getAverage(),
-                s.getHighest(),
-                s.getLowest(),
-                s.isPassed() ? "✅ Passed" : "❌ Failed");
+        for(Student s : students) {
+            System.out.println(s.getName() + "\t\t" + 
+                             java.util.Arrays.toString(s.getMarks()) + "\t" +
+                             s.getAverage() + "\t" + s.getHighest() + "\t" +
+                             s.getLowest() + "\t" + (s.isPassed()?"Pass":"Fail"));
         }
     }
 
-    public void showTopper() {
-        Student topper = students[0];
-        for (Student s : students) {
-            if (s.getAverage() > topper.getAverage()) {
-                topper = s;
+    public void findTopper() {
+        Student top = students[0];
+        for(Student s : students) {
+            if(s.getAverage() > top.getAverage()) top = s;
+        }
+        System.out.println("\nTopper: " + top.getName() + " (" + 
+                          top.getAverage() + ")");
+    }
+
+    public void showFailed() {
+        System.out.print("\nFailed: ");
+        boolean any = false;
+        for(Student s : students) {
+            if(!s.isPassed()) {
+                System.out.print(s.getName() + " ");
+                any = true;
             }
         }
-        System.out.println("\n🏆 Topper: " + topper.getName() + " with average " + String.format("%.2f", topper.getAverage()));
+        if(!any) System.out.print("None");
     }
 
-    public void showFailedStudents() {
-        System.out.println("\n❌ Failed Students:");
-        boolean found = false;
-        for (Student s : students) {
-            if (!s.isPassed()) {
-                System.out.println("- " + s.getName());
-                found = true;
+    public void rankings() {
+        Student[] copy = java.util.Arrays.copyOf(students, students.length);
+        java.util.Arrays.sort(copy, (a,b) -> Float.compare(b.getAverage(), a.getAverage()));
+        
+        System.out.println("\nRankings:");
+        for(int i=0; i<copy.length; i++) {
+            System.out.println((i+1) + ". " + copy[i].getName() + " - " + copy[i].getAverage());
+        }
+    }
+
+    public void subjectWise() {
+        System.out.println("\nSubject wise top/low:");
+        for(int sub=0; sub<numSubs; sub++) {
+            int high=-1, low=101;
+            String hname="", lname="";
+            for(Student s : students) {
+                int m = s.getMarks()[sub];
+                if(m > high) { high=m; hname=s.getName(); }
+                if(m < low) { low=m; lname=s.getName(); }
             }
-        }
-        if (!found) System.out.println("None 🎉");
-    }
-
-    public void displayRankings() {
-      
-        Student[] ranked = Arrays.copyOf(students, students.length);
-
-        Arrays.sort(ranked, (a, b) -> Float.compare(b.getAverage(), a.getAverage()));
-
-        System.out.println("\n🏅 Class Ranking:");
-        System.out.printf("%-5s %-15s %-10s\n", "Rank", "Name", "Average");
-        System.out.println("-------------------------------");
-
-        for (int i = 0; i < ranked.length; i++) {
-            System.out.printf("%-5d %-15s %-10.2f\n", i+1, ranked[i].getName(), ranked[i].getAverage());
+            System.out.println("Sub" + (sub+1) + ": " + hname + "(" + high + ") / " + 
+                             lname + "(" + low + ")");
         }
     }
 
-    public void showSubjectTopLow() {
-        System.out.println("\n📊 Subject-wise Highest and Lowest Scorers:");
-        for (int sub = 0; sub < numSubjects; sub++) {
-            int highestMark = -1;
-            int lowestMark = 101;
-            String highestScorer = "";
-            String lowestScorer = "";
-
-            for (Student s : students) {
-                int mark = s.getMarks()[sub];
-                if (mark > highestMark) {
-                    highestMark = mark;
-                    highestScorer = s.getName();
-                }
-                if (mark < lowestMark) {
-                    lowestMark = mark;
-                    lowestScorer = s.getName();
-                }
-            }
-            System.out.printf("Subject %d -> Highest: %s (%d), Lowest: %s (%d)\n",
-                sub + 1, highestScorer, highestMark, lowestScorer, lowestMark);
-        }
-    }
-
-    public void showPassStatistics() {
-        int total = students.length;
-        int passedCount = 0;
-        for (Student s : students) {
-            if (s.isPassed()) passedCount++;
-        }
-        float passPercentage = (float) passedCount / total * 100;
-        System.out.printf("\n📈 Pass Percentage: %.2f%% (%d out of %d students passed)\n",
-                          passPercentage, passedCount, total);
+    public void passStats() {
+        int pass=0;
+        for(Student s : students) if(s.isPassed()) pass++;
+        System.out.println("\nPass %: " + (pass*100.0/students.length) + "%");
     }
 }
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("===============================================");
-        System.out.println("               🎓 Student Marks Analyzer 🎓");
-        System.out.println("===============================================\n");
-
         Scanner sc = new Scanner(System.in);
-
-        int numStudents = 0, numSubjects = 0;
-
-        while (true) {
-            try {
-                System.out.print("Enter number of students: ");
-                numStudents = sc.nextInt();
-                if (numStudents <= 0) {
-                    System.out.println("⚠ Number of students must be positive.");
-                } else {
-                    break;
-                }
-            } catch (InputMismatchException ime) {
-                System.out.println("⚠ Invalid input! Please enter an integer.");
-                sc.nextLine(); // clear buffer
-            }
-        }
-
-        while (true) {
-            try {
-                System.out.print("Enter number of subjects: ");
-                numSubjects = sc.nextInt();
-                if (numSubjects <= 0) {
-                    System.out.println("⚠ Number of subjects must be positive.");
-                } else {
-                    break;
-                }
-            } catch (InputMismatchException ime) {
-                System.out.println("⚠ Invalid input! Please enter an integer.");
-                sc.nextLine(); // clear buffer
-            }
-        }
-        sc.nextLine(); 
-
-     
-        MarksAnalyzer analyzer = new MarksAnalyzer(numStudents, numSubjects);
-
-
-        analyzer.inputStudentData(sc);
-
-       
-        analyzer.displayResults();
-
- 
-        analyzer.showTopper();
-
-    
-        analyzer.showFailedStudents();
-
-     
-        analyzer.displayRankings();
-
         
-        analyzer.showSubjectTopLow();
+        System.out.print("No. students: ");
+        int nstud = sc.nextInt();
+        System.out.print("No. subjects: ");
+        int nsub = sc.nextInt();
+        sc.nextLine();
 
-       
-        analyzer.showPassStatistics();
+        MarksAnalyzer ma = new MarksAnalyzer(nstud, nsub);
+        ma.getAllData(sc);
 
-        System.out.println("\n===============================================");
-        System.out.println("           ✅ Analysis Completed Successfully ✅");
-        System.out.println("===============================================\n");
+        ma.showResults();
+        ma.findTopper();
+        ma.showFailed();
+        ma.rankings();
+        ma.subjectWise();
+        ma.passStats();
 
         sc.close();
     }
