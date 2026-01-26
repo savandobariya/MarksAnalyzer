@@ -68,7 +68,7 @@ class MarksAnalyzer {
     public void showResults() {
         System.out.println("\nStudent Results:");
         System.out.println("Name\t\tMarks\t\tAvg\tHigh\tLow\tStatus");
-        System.out.println("-------------------------------------------------------");
+        System.out.println("-------");
 
         for(Student s : students) {
             System.out.println(s.getName() + "\t\t" + 
@@ -154,3 +154,4 @@ public class Main {
         sc.close();
     }
 }
+
